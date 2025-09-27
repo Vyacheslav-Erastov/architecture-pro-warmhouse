@@ -1,0 +1,10 @@
+site_name: Warm House Documentation
+theme:
+  name: material
+markdown_extensions:
+  - md_in_html
+  - plantuml_markdown
+plugins:
+  - search
+  - plantuml:
+      puml_url: http://plantuml:8080
