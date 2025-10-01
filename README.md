@@ -72,10 +72,12 @@
 - Домен управления устройствами:
   - Контекст управления устройствами:
     - Сущности: `устройство`.
+- Домен управления датчиками (в дальнейшем станет частью домена управления устройствами):
+  - Контекст управления датчиками:
+    - Сущности: `датчик`.
 - Домен сбора телеметрии:
   - Контекст сбора телеметрии:
-    - Сущности: `датчик`;
-    - Объекты значений: `событие телеметрии`.
+    - Сущности: `событие телеметрии`.
 
 ### **4. Проблемы монолитного решения**
 
@@ -124,13 +126,45 @@
 
 Добавьте диаграмму.
 
+[Диаграмма контейнеров в модели C4](./documentation/docs/docs/architecture/container.md)
+
+<center>
+
+![Визуализация диаграммы контейнеров в модели C4](./documentation/docs/docs/architecture/container.svg)
+
+</center>
+
 **Диаграмма компонентов (Components)**
 
 Добавьте диаграмму для каждого из выделенных микросервисов.
 
+[Диаграмма компонентов в модели C4](./documentation/docs/docs/architecture/component.md)
+
+<center>
+
+![Визуализация диаграммы компонентов в модели C4](./documentation/docs/docs/architecture/component.svg)
+
+</center>
+
 **Диаграмма кода (Code)**
 
 Добавьте одну диаграмму или несколько.
+
+[Диаграмма кода DeviceService в модели C4](./documentation/docs/docs/architecture/code/DeviceService.md)
+
+<center>
+
+![Визуализация диаграммы кода DeviceService в модели C4](./documentation/docs/docs/architecture/code/DeviceService.svg)
+
+</center>
+
+[Диаграмма кода TelemetryService в модели C4](./documentation/docs/docs/architecture/code/TelemetryService.md)
+
+<center>
+
+![Визуализация диаграммы кода TelemetryService в модели C4](./documentation/docs/docs/architecture/code/TelemetryService.svg)
+
+</center>
 
 # Задание 3. Разработка ER-диаграммы
 
@@ -200,7 +234,6 @@ Locations - название комнаты, sensorId - идентификато
 Должно при каждом вызове отображаться разное значение температуры
 
 Ревьюер будет проверять точно так же.
-
 
 # **Задание 6. Разработка MVP**
 

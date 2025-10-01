@@ -1,6 +1,27 @@
 site_name: Warm House Documentation
 theme:
   name: material
+  palette:
+    - media: "(prefers-color-scheme)"
+    #   toggle:
+    #     icon: material/brightness-auto
+    #     name: Switch to light mode
+
+    # - media: "(prefers-color-scheme: light)"
+    #   scheme: default
+    #   primary: teal
+    #   accent: pink
+    #   toggle:
+    #     icon: material/toggle-switch
+    #     name: Switch to dark mode
+
+    # - media: "(prefers-color-scheme: dark)"
+    #   scheme: slate
+    #   primary: black
+    #   accent: deep orange
+    #   toggle:
+    #     icon: material/toggle-switch-off-outline
+    #     name: Switch to light mode
 markdown_extensions:
   - md_in_html
   - plantuml_markdown
@@ -8,3 +29,7 @@ plugins:
   - search
   - plantuml:
       puml_url: http://plantuml:8080
+      theme:
+        url: .
+        light: light
+        dark: dark
