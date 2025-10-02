@@ -1,0 +1,281 @@
+openapi: 3.1.0
+info:
+  title: Device Service API
+  version: 0.1.0
+  description: API для управления устройствами
+
+servers:
+  - url: http://localhost:8090
+    description: Локальный сервер
+
+paths:
+  /devices:
+    get:
+      summary: Получить список всех устройств
+      operationId: getDevices
+      tags:
+        - Devices
+      responses:
+        "200":
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Device"
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Создать новое устройство
+      operationId: createDevice
+      tags:
+        - Devices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceCreate"
+      responses:
+        "201":
+          description: Устройство успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceCreate"
+        "400":
+          description: Неверный формат запроса
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /devices/{id}:
+    get:
+      summary: Получить устройство по ID
+      operationId: getDeviceByID
+      tags:
+        - Devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID устройства
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Устройство найдено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        "404":
+          description: Устройство не найдено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /devices/{id}/status:
+    patch:
+      summary: Обновить статус устройства
+      operationId: updateStatus
+      tags:
+        - Devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID устройства
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: object
+                  description: JSON объект статуса устройства
+                  example: '{"temperature": 25.5, "humidity": 60}'
+      responses:
+        "200":
+          description: Статус успешно обновлен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "status updated"
+        "400":
+          description: Неверный формат запроса
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /devices/{id}/commands:
+    post:
+      summary: Отправить команду устройству
+      operationId: sendCommand
+      tags:
+        - Commands
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID устройства (целое число)
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - command_type
+                - parameters
+              properties:
+                command_type:
+                  type: string
+                  description: Тип команды
+                  example: "turn_on"
+                parameters:
+                  type: object
+                  description: Параметры команды
+                  example: { "brightness": 75 }
+      responses:
+        "202":
+          description: Команда успешно отправлена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "command sent"
+                  device_id:
+                    type: integer
+                    format: int32
+                  type:
+                    type: string
+        "400":
+          description: Неверный формат запроса или ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    DeviceCreate:
+      type: object
+      required:
+        - name
+        - type
+        - status
+        - location
+      properties:
+        name:
+          type: string
+          description: Название устройства
+          example: "Датчик температуры в гостиной"
+        type:
+          type: string
+          enum: [sensor, gates, heating_controller, light_bulb, camera]
+          description: Тип устройства
+        status:
+          type: object
+          description: Статус устройства в формате JSON
+          example: '{"temperature": 22.5, "battery": 85}'
+        location:
+          type: string
+          description: Местоположение устройства
+          example: "Гостиная"
+
+    Device:
+      allOf:
+        - $ref: "#/components/schemas/DeviceCreate"
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int32
+              description: Уникальный идентификатор устройства
+              example: 1
+            created_at:
+              type: string
+              format: date-time
+              description: Дата и время создания устройства
+              example: "2023-10-05T14:30:00Z"
+            last_updated:
+              type: string
+              format: date-time
+              description: Дата и время последнего обновления
+              example: "2023-10-05T15:45:00Z"
+
+    Command:
+      type: object
+      required:
+        - device_id
+        - command_type
+        - parameters
+      properties:
+        device_id:
+          type: integer
+          format: int32
+          description: ID устройства
+        command_type:
+          type: string
+          description: Тип команды
+          example: "set_temperature"
+        parameters:
+          type: object
+          description: Параметры команды
+          example: { "temperature": 23 }
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Сообщение об ошибке
+          example: "device not found"
+        details:
+          type: string
+          description: Детали ошибки (опционально)
+          example: "Device ID must be an integer"

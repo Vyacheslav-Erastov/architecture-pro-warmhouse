@@ -1,0 +1,139 @@
+asyncapi: 3.0.0
+info:
+  title: Device Service Messaging API
+  version: 0.1.0
+  description: AsyncAPI для системы управления устройствами через RabbitMQ
+
+servers:
+  rabbitmq:
+    host: localhost:5672
+    protocol: amqp
+    description: RabbitMQ server for device management
+    tags:
+      - name: rabbitmq
+        description: Основной сервер сообщений
+
+defaultContentType: application/json
+
+channels:
+  device_commands_queue:
+    address: device_commands_queue
+    description: Очередь для отправки команд устройствам
+    messages:
+      deviceCommand:
+        $ref: "#/components/messages/DeviceCommand"
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          exclusive: false
+          durable: true
+          autoDelete: false
+          vhost: /
+
+components:
+  messages:
+    DeviceCommand:
+      name: deviceCommand
+      title: Device Command Message
+      summary: Команда отправляемая устройству
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/Command"
+      examples:
+        - name: Turn on light
+          payload:
+            device_id: 1
+            command_type: "turn_on"
+            parameters:
+              brightness: 75
+        - name: Set temperature
+          payload:
+            device_id: 2
+            command_type: "set_temperature"
+            parameters:
+              temperature: 22.5
+        - name: Open gates
+          payload:
+            device_id: 3
+            command_type: "open"
+            parameters:
+              duration: 30
+
+  schemas:
+    Command:
+      type: object
+      description: Команда для управления устройством
+      required:
+        - device_id
+        - command_type
+        - parameters
+      properties:
+        device_id:
+          type: integer
+          format: int
+          description: ID устройства-получателя
+          minimum: 1
+          example: 1
+        command_type:
+          type: string
+          description: Тип команды для выполнения
+          minLength: 1
+          examples:
+            - "turn_on"
+            - "turn_off"
+            - "set_temperature"
+            - "set_brightness"
+            - "open"
+            - "close"
+            - "start_recording"
+            - "stop_recording"
+        parameters:
+          type: object
+          description: Параметры команды в зависимости от типа устройства
+          additionalProperties: true
+          examples:
+            - { "brightness": 75 }
+            - { "temperature": 22.5 }
+            - { "duration": 30 }
+            - { "mode": "auto" }
+
+    DeviceStatusUpdate:
+      type: object
+      description: Обновление статуса устройства (пример для будущего расширения)
+      required:
+        - device_id
+        - status
+        - timestamp
+      properties:
+        device_id:
+          type: integer
+          format: int
+          description: ID устройства
+        status:
+          type: object
+          description: Текущий статус устройства
+          additionalProperties: true
+        timestamp:
+          type: string
+          format: date-time
+          description: Время обновления статуса
+
+  securitySchemes:
+    userPassword:
+      type: userPassword
+      description: Аутентификация по логину и паролю RabbitMQ
+
+operations:
+  sendDeviceCommand:
+    action: send
+    channel:
+      $ref: "#/channels/device_commands_queue"
+    title: Send Device Command
+    summary: Отправка команды устройству через очередь
+    description: |
+      Отправляет команду в очередь device_commands_queue для обработки устройством.
+      Команда будет доставлена соответствующему устройству по device_id.
+    tags:
+      - name: commands
+        description: Операции с командами устройств

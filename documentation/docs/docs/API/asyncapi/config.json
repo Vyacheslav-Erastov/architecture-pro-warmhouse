@@ -1,0 +1,12 @@
+{
+  "specs": [
+    {
+      "name": "Device Service",
+      "file": "device_service.yaml"
+    },
+    {
+      "name": "Telemetry Service",
+      "file": "telemetry_service.yaml"
+    }
+  ]
+}

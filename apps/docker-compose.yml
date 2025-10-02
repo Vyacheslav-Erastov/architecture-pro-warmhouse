@@ -4,9 +4,50 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: smarthome-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./smart_home/init.sql:/docker-entrypoint-initdb.d/smarthome.sql
+      - ./device_service/init.sql:/docker-entrypoint-initdb.d/device_service.sql
+      - ./telemetry_service/init.sql:/docker-entrypoint-initdb.d/telemetry_service.sql
+    healthcheck:
+      test: pg_isready -U postgres -d smarthome
+    networks:
+      - smarthome-network
   ## тут нужно добавить настройки
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - smarthome-network
+
   temperature-api:
+    build:
+      context: ./temperature_api
+      dockerfile: Dockerfile
+    container_name: temperature-api
+    command: bash -c "python3 main.py"
+    volumes:
+      - ./temperature_api:/app
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
   ## тут нужно добавить приложение
 
   app:
@@ -28,8 +69,50 @@ services:
     networks:
       - smarthome-network
 
+  device-service:
+    build:
+      context: ./device_service
+      dockerfile: Dockerfile
+    container_name: device-service-app
+    environment:
+      - DB_HOST=postgres
+      - RMQ_HOST=rabbitmq
+      - SERVER_PORT=8090
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    ports:
+      - "8090:8090"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
+  telemetry-service:
+    build:
+      context: ./telemetry_service
+      dockerfile: Dockerfile
+    container_name: telemetry-service-app
+    command: bash -c "python3 main.py"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    volumes:
+      - ./telemetry_service:/app
+    environment:
+      - ENVIRONMENT=CONTAINER
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
 volumes:
   postgres_data:
+  rabbitmq_data:
 
 networks:
   smarthome-network:
