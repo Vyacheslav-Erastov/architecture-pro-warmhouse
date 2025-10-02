@@ -1,0 +1,202 @@
+asyncapi: 3.0.0
+info:
+  title: Telemetry Service
+  version: 0.1.0
+  description: Сервис обработки телеметрии устройств
+
+defaultContentType: application/json
+
+servers:
+  rabbitmq:
+    host: localhost:5672
+    protocol: amqp
+    description: RabbitMQ server for telemetry processing
+    tags:
+      - name: rabbitmq
+        description: Основной сервер сообщений
+
+operations:
+  processTelemetry:
+    action: receive
+    channel:
+      $ref: "#/channels/telemetryQueue"
+    summary: Обработка телеметрии устройств
+    description: |
+      Получает телеметрию из очереди, сохраняет в БД, 
+      обновляет статус устройства через API и публикует системное событие.
+    tags:
+      - name: telemetry
+        description: Операции с телеметрией
+    traits:
+      - $ref: "#/components/operationTraits/amqp"
+
+  publishSystemEvent:
+    action: send
+    channel:
+      $ref: "#/channels/systemEvents"
+    summary: Публикация системных событий
+    description: Публикует события в широковещательный exchange
+    tags:
+      - name: events
+        description: Системные события
+    traits:
+      - $ref: "#/components/operationTraits/amqp"
+
+channels:
+  telemetryQueue:
+    address: telemetry_queue
+    description: Очередь для входящей телеметрии устройств
+    messages:
+      TelemetryMessage:
+        $ref: "#/components/messages/TelemetryMessage"
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: telemetry_queue
+          durable: true
+          exclusive: false
+          autoDelete: false
+
+  systemEvents:
+    address: system_events
+    description: Exchange для широковещательных системных событий
+    messages:
+      SystemEventMessage:
+        $ref: "#/components/messages/SystemEventMessage"
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: system_events
+          type: fanout
+          durable: true
+          autoDelete: false
+
+components:
+  messages:
+    TelemetryMessage:
+      name: TelemetryMessage
+      title: Telemetry Data
+      summary: Данные телеметрии устройства
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - device_id
+          - event_data
+        properties:
+          device_id:
+            type: integer
+            format: int
+            description: Уникальный идентификатор устройства
+            examples:
+              - 1
+          event_data:
+            type: object
+            description: JSON объект с произвольными данными телеметрии
+            additionalProperties: true
+            examples:
+              - power: "on"
+          timestamp:
+            type: string
+            format: date-time
+            description: Временная метка события
+          additional_data:
+            type: object
+            description: Дополнительные данные телеметрии
+            additionalProperties: true
+      examples:
+        - name: Device Online
+          payload:
+            device_id: 1
+            event_data:
+              power: "on"
+            timestamp: "2024-01-15T10:30:00Z"
+
+    SystemEventMessage:
+      name: SystemEventMessage
+      title: System Event
+      summary: Системное событие от телеметрии
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - source
+          - device_id
+          - event
+        properties:
+          source:
+            type: string
+            description: Источник события
+            const: "telemetry-service"
+          device_id:
+            type: integer
+            format: int
+            description: Уникальный идентификатор устройства
+          event:
+            type: object
+            description: Исходные данные телеметрии
+            properties:
+              device_id:
+                type: integer
+              event_data:
+                type: object
+          timestamp:
+            type: string
+            format: date-time
+            description: Временная метка создания системного события
+      examples:
+        - name: System Event Example
+          payload:
+            source: "telemetry-service"
+            device_id: 1
+            event:
+              device_id: 1
+              event_data:
+                power: "on"
+            timestamp: "2024-01-15T10:30:00Z"
+
+  schemas:
+    TelemetryCreate:
+      type: object
+      required:
+        - device_id
+        - event_data
+      properties:
+        device_id:
+          type: integer
+          format: int
+        event_data:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    DeviceStatusUpdate:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          examples:
+            - "online"
+            - "offline"
+            - "error"
+        updated_at:
+          type: string
+          format: date-time
+
+  operationTraits:
+    amqp:
+      bindings:
+        amqp:
+          ack: true
+          deliveryMode: 2
+          priority: 0
+
+  securitySchemes:
+    userPassword:
+      type: userPassword
+      description: Аутентификация по логину и паролю RabbitMQ

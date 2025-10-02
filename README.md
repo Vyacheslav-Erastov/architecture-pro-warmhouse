@@ -183,9 +183,24 @@
 
 Укажите, какой тип API вы будете использовать для взаимодействия микросервисов. Объясните своё решение.
 
+Я буду использоавть комбинацию REST API и AsyncAPI:
+- REST API для обеспечения предсказуемого и синхронного интерфейса для конечных пользователей.
+- AsyncAPI для обеспечения слабосвязанной, асинхронной и надежной коммуникацию внутри системы.
+
 ### 2. Документация API
 
 Здесь приложите ссылки на документацию API для микросервисов, которые вы спроектировали в первой части проектной работы. Для документирования используйте Swagger/OpenAPI или AsyncAPI.
+
+#### Device Service API
+
+[Device Service OpenAPI спекцификация](./documentation/docs/docs/API/openapi/device_service.yaml)
+[Device Service AsyncAPI спекцификация](./documentation/docs/docs/API/asyncapi/device_service.yaml)
+
+#### Telemetry Service API
+
+[Telemetry Service OpenAPI спекцификация](./documentation/docs/docs/API/openapi/telemetry_service.yaml)
+[Telemetry Service AsyncAPI спекцификация](./documentation/docs/docs/API/asyncapi/telemetry_service.yaml)
+
 
 # Задание 5. Работа с docker и docker-compose
 
