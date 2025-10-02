@@ -100,11 +100,11 @@
 
 [Диаграмма контекста в модели C4](./documentation/docs/docs/architecture/context.md)
 
-<center>
+<div align="center">
 
 ![Визуализация диаграммы контекста в модели C4](./documentation/docs/docs/architecture/context.svg)
 
-</center>
+</div>
 
 Чтобы добавить ссылку в файл Readme.md, нужно использовать синтаксис Markdown. Это делают так:
 
@@ -128,11 +128,11 @@
 
 [Диаграмма контейнеров в модели C4](./documentation/docs/docs/architecture/container.md)
 
-<center>
+<div align="center">
 
 ![Визуализация диаграммы контейнеров в модели C4](./documentation/docs/docs/architecture/container.svg)
 
-</center>
+</div>
 
 **Диаграмма компонентов (Components)**
 
@@ -140,11 +140,11 @@
 
 [Диаграмма компонентов в модели C4](./documentation/docs/docs/architecture/component.md)
 
-<center>
+<div align="center">
 
 ![Визуализация диаграммы компонентов в модели C4](./documentation/docs/docs/architecture/component.svg)
 
-</center>
+</div>
 
 **Диаграмма кода (Code)**
 
@@ -152,30 +152,31 @@
 
 [Диаграмма кода DeviceService в модели C4](./documentation/docs/docs/architecture/code/DeviceService.md)
 
-<center>
+<div align="center">
 
 ![Визуализация диаграммы кода DeviceService в модели C4](./documentation/docs/docs/architecture/code/DeviceService.svg)
 
-</center>
+</div>
 
 [Диаграмма кода TelemetryService в модели C4](./documentation/docs/docs/architecture/code/TelemetryService.md)
 
-<center>
+<div align="center">
 
 ![Визуализация диаграммы кода TelemetryService в модели C4](./documentation/docs/docs/architecture/code/TelemetryService.svg)
 
-</center>
+</div>
 
 # Задание 3. Разработка ER-диаграммы
 
 Добавьте сюда ER-диаграмму. Она должна отражать ключевые сущности системы, их атрибуты и тип связей между ними.
 
 [ER-диаграмма системы](./documentation/docs/docs/ER_diagram.md)
-<center>
+
+<div align="center">
 
 ![Визуализация ER-диаграммы системы](./documentation/docs/docs/ER-diagram.svg)
 
-</center>
+</div>
 
 # Задание 4. Создание и документирование API
 
@@ -194,11 +195,13 @@
 #### Device Service API
 
 [Device Service OpenAPI спекцификация](./documentation/docs/docs/API/openapi/device_service.yaml)
+
 [Device Service AsyncAPI спекцификация](./documentation/docs/docs/API/asyncapi/device_service.yaml)
 
 #### Telemetry Service API
 
 [Telemetry Service OpenAPI спекцификация](./documentation/docs/docs/API/openapi/telemetry_service.yaml)
+
 [Telemetry Service AsyncAPI спекцификация](./documentation/docs/docs/API/asyncapi/telemetry_service.yaml)
 
 
@@ -267,3 +270,13 @@ Locations - название комнаты, sensorId - идентификато
 2. Обеспечьте взаимодействие между микросервисами и монолитом (при желании с помощью брокера сообщений), чтобы постепенно перенести функциональность из монолита в микросервисы. 
 
 В результате у вас должны быть созданы Dockerfiles и docker-compose для запуска микросервисов. 
+
+Для запуска системы необходимо выполнить команду `docker compose up -d`
+
+Для запуска сервера документации необходимо перейти в директорию `documentation` и ввести `docker compose up -d`. После этого можно открыть Swagger UI по [ссылке](http://localhost:9002)
+
+Для просмотра генерации событий сервиса телеметрии необходимо запустить [скрипт](./apps/tests/telemetry_generator.py)
+
+```
+python3 telemetry_generator.py
+```
